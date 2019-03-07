@@ -7,6 +7,7 @@ from LDA import LDA
 
 usePCA = True
 useLDA = False
+useFaceRecognition = False
 
 def display_image(image):
     """
@@ -21,9 +22,45 @@ def display_image(image):
     cv.waitKey(0)
     return
 
-def readDataset():
+def readRandomDataset(maxImageCount = 100):
+    datasetDirctory = "dataset/rand_images/"
+    labelIndex = 2
+    imageCount = 0
+
+    imageNames = os.listdir(datasetDirctory)
+    data = None
+    labels = []
+
+    for imageName in imageNames:
+        # add correct label.
+        labels.append(labelIndex)
+
+        # read the image and flatten it.
+        imagePath = datasetDirctory +  imageName
+        image = np.array(cv.imread(imagePath, -1))
+        image = image.flatten()
+
+        # if first image create new array.
+        if data is None:
+            data = image
+            # else stack the image to the bottom of the current data.
+        else:
+            data = np.vstack((data, image))
+            
+        imageCount = imageCount + 1
+
+        if imageCount == maxImageCount:
+            break
+    
+    data = np.array(data)
+    labels = np.array(labels)
+
+    return splitData(data, labels, 5)
+
+
+def readORLDataset(maxImageCount = 400, faceRecognition = True):
     """
-    Reads the dataset and splits it into training and testing parts.
+    Reads the orl_faces dataset and splits it into training and testing parts.
     :return:
         - A numpy array of the shape (400, 10304) which 
           has the data of the images.
@@ -31,8 +68,13 @@ def readDataset():
     """
 
     datasetDirectory = "dataset/orl_faces/"
-    labelIndex = 0
-
+    imageCount = 0
+    
+    if faceRecognition:
+        labelIndex = 0
+    else:
+        labelIndex = 1
+    
     # get a list of directories in the dataset.
     directories = os.listdir(datasetDirectory)
     directories.sort(key = natural_keys)
@@ -45,7 +87,8 @@ def readDataset():
     # for each subject directory.
     for directory in directories:
         # 9ncrease label index to match current subject.
-        labelIndex = labelIndex + 1
+        if faceRecognition:
+            labelIndex = labelIndex + 1
 
         # get a list of all image names in the directory.
         subjectPath = datasetDirectory + directory
@@ -68,6 +111,14 @@ def readDataset():
             # else stack the image to the bottom of the current data.
             else:
                 data = np.vstack((data, image))
+            
+            imageCount = imageCount + 1
+
+            if imageCount == maxImageCount:
+                break
+        
+        if imageCount == maxImageCount:
+                break
 
     data = np.array(data)
     labels = np.array(labels)
@@ -128,7 +179,16 @@ def atoi(text):
 def natural_keys(text):
     return [ atoi(c) for c in re.split(r'(\d+)', text) ]
 
-trainingData, trainingLabels, testingData, testingLabels = readDataset()
+if useFaceRecognition:
+    trainingData, trainingLabels, testingData, testingLabels = readORLDataset()  
+else:
+    orlTrainingData, orlTrainingLabels, orlTestingData, orlTestingLabels = readORLDataset(maxImageCount=100, faceRecognition=False)
+    randomTrainingData, randomTrainingLabels, randomTestingData, randomTestingLabels = readRandomDataset()
+
+    trainingData = np.vstack((orlTrainingData, randomTrainingData))
+    trainingLabels = np.hstack((orlTrainingLabels, randomTrainingLabels))
+    testingData = np.vstack((orlTestingData, randomTestingData))
+    testingLabels = np.hstack((orlTestingLabels, randomTestingLabels))
 
 if usePCA:
     pca = PCA()
