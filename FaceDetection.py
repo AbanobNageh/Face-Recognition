@@ -23,10 +23,21 @@ def display_image(image):
     return
 
 def readRandomDataset(maxImageCount = 100):
+    """
+    Reads the random dataset in oeder to use it to classifiy faaces vs non faces.
+    :param maxImageCount:
+        the maximum number of images to load.
+    :return:
+        - A numpy array of the shape (400, 10304) which 
+          has the data of the images.
+        - A numpy array that contains the labels of each image.
+    """
+    
     datasetDirctory = "dataset/rand_images/"
     labelIndex = 2
     imageCount = 0
 
+    # list the images of the random dataset.
     imageNames = os.listdir(datasetDirctory)
     data = None
     labels = []
@@ -43,12 +54,13 @@ def readRandomDataset(maxImageCount = 100):
         # if first image create new array.
         if data is None:
             data = image
-            # else stack the image to the bottom of the current data.
+        # else stack the image to the bottom of the current data.
         else:
             data = np.vstack((data, image))
             
         imageCount = imageCount + 1
 
+        # if the image count reaches the maximum count break.
         if imageCount == maxImageCount:
             break
     
@@ -57,10 +69,15 @@ def readRandomDataset(maxImageCount = 100):
 
     return splitData(data, labels, 5)
 
-
 def readORLDataset(maxImageCount = 400, faceRecognition = True):
     """
     Reads the orl_faces dataset and splits it into training and testing parts.
+    :param maxImageCount:
+        Optional, the maximum number of images to load.
+    :param faceRecognition:
+        Optional, a boolean that indicated the reason for reading the dataset,
+        if it is True then the labels are different for each face.
+        if it is False then labels are all the same for all faces.
     :return:
         - A numpy array of the shape (400, 10304) which 
           has the data of the images.
@@ -114,6 +131,7 @@ def readORLDataset(maxImageCount = 400, faceRecognition = True):
             
             imageCount = imageCount + 1
 
+            # if the image count reaches the maximum count break.
             if imageCount == maxImageCount:
                 break
         
@@ -179,23 +197,29 @@ def atoi(text):
 def natural_keys(text):
     return [ atoi(c) for c in re.split(r'(\d+)', text) ]
 
+# if doing face recognition read the orl dataset only..
 if useFaceRecognition:
     trainingData, trainingLabels, testingData, testingLabels = readORLDataset()  
+# else read 100 images only from the orl dataset and the random dataset.
 else:
+    # read datasets.
     orlTrainingData, orlTrainingLabels, orlTestingData, orlTestingLabels = readORLDataset(maxImageCount=100, faceRecognition=False)
     randomTrainingData, randomTrainingLabels, randomTestingData, randomTestingLabels = readRandomDataset()
 
+    # stack the datasets togather.
     trainingData = np.vstack((orlTrainingData, randomTrainingData))
     trainingLabels = np.hstack((orlTrainingLabels, randomTrainingLabels))
     testingData = np.vstack((orlTestingData, randomTestingData))
     testingLabels = np.hstack((orlTestingLabels, randomTestingLabels))
 
 if usePCA:
+    # initialize PCA and train and test.
     pca = PCA()
     pca.train(trainingData, trainingLabels)
     pca.test(testingData, testingLabels)
 
 if useLDA:
+    # initialize LDA and train and test.
     lda = LDA()
     lda.train(trainingData, trainingLabels)
     lda.test(testingData, testingLabels)

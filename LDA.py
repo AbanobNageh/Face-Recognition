@@ -5,6 +5,10 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 class LDA:
     def __init__(self):
+        """
+        initialized the LDA Class.
+        """
+
         self.classCount = None
         self.overallMean = None
         self.projectionMatrix = None
@@ -15,6 +19,17 @@ class LDA:
         self.useSklearn = True
     
     def train(self, trainingData, trainingLabels):
+        """
+        Used to calculate the projection matrix and then
+        transform the training data.
+        :param trainingData:
+            The training data as a (number of observations, number of features) numpy array.
+        :param trainingLabels:
+            The training labels as a numpy array.
+        :return:
+            Nothing.
+        """
+
         sampleCount = np.bincount(trainingLabels)
         self.classCount = sampleCount.size - 1
         self.overallMean = np.mean(trainingData, axis=0)
@@ -87,6 +102,20 @@ class LDA:
         print("the shape of the projected training data matrix is: " + str(self.projectedTrainingData.shape))
 
     def test(self, testingData, testingLabels, neighborsCount = 1):
+        """
+        Used to project the testing data using the projection matrix.
+        it then reports the number of correct and incorrect pridictions
+        using K-neariest Neighbors, it reports the results for five values
+        of k, these values are 1, 3, 5, 7, 9.
+        finally it plots the results.
+        :param testingData:
+            The testing data as a (number of observations, number of features) numpy array.
+        :param testingLabels:
+            The testing labels as a numpy array.
+        :return:
+            Nothing.
+        """
+
         neariestNeighborsRange = [1, 3, 5, 7, 9]
         accuracies = []
 
@@ -123,6 +152,17 @@ class LDA:
         self.plotResult(neariestNeighborsRange, accuracies)
 
     def plotResult(self, neariestNeighborsRange, accuracies):
+        """
+        Plots the testing result, it plots the K values on the x-axis
+        and the accuracy on the y-axis.
+        :param neariestNeighborsRange:
+            The K values used for testing.
+        :param accuracies:
+            The accuracies obtained.
+        :return:
+            Nothing.
+        """
+
         plt.xlabel('K Values')
         plt.ylabel('Accuracy')
         plt.title('Result')
@@ -130,8 +170,19 @@ class LDA:
         plt.show()
 
     def findNearestNeighbors(self, testingVector, neighborsCount = 1):
+        """
+        Used to find the neariest neighbors of a vector.
+        :param testingVector:
+            The testing vector.
+        :param neighborsCount:
+            The number of neighbors to return.
+        :return:
+            The neariest neighbors as a numpy array.
+        """
+
         eculidenDistances = []
         testingVector = np.reshape(testingVector, (1, testingVector.shape[0]))
+        
         for trainingVector in self.projectedTrainingData:
             trainingVector = np.reshape(trainingVector, (1, trainingVector.shape[0]))
             distance = np.linalg.norm(trainingVector - testingVector, axis=1)
@@ -145,6 +196,16 @@ class LDA:
         return nearestNeighborsLabels
 
     def predictLabel(self, testingVector, neighborsCount = 1):
+        """
+        Predicts the label of the given testing vector.
+        :param testingVector:
+            The testing vector.
+        :param neighborsCount:
+            The number of neighbors used to predict the label.
+        :return:
+            The predicted label.
+        """
+        
         nearestNeighborsLabels = self.findNearestNeighbors(testingVector, neighborsCount)
         counts = np.bincount(nearestNeighborsLabels)
         predictedLabel = np.argmax(counts)
