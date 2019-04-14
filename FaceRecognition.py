@@ -5,8 +5,8 @@ import re
 from PCA import PCA
 from LDA import LDA
 
-usePCA = True
-useLDA = False
+usePCA = False
+useLDA = True
 useFaceRecognition = False
 
 def display_image(image):
@@ -47,7 +47,7 @@ def readRandomDataset(maxImageCount = 100):
         labels.append(labelIndex)
 
         # read the image and flatten it.
-        imagePath = datasetDirctory +  imageName
+        imagePath = datasetDirctory + imageName
         image = np.array(cv.imread(imagePath, -1))
         image = image.flatten()
 

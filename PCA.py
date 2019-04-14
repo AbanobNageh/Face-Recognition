@@ -15,8 +15,9 @@ class PCA:
         self.projectionMatrix = None
         self.projectedTrainingData = None
         self.pca = None
+        self.alpha = 0.95
         self.trainingLabels = None
-        self.useSklearn = True
+        self.useSklearn = False
 
     # Project the training data.
     def train(self, trainingData, trainingLabels):
@@ -56,7 +57,7 @@ class PCA:
         print("the shape of the values matrix is: " + str(self.eignValues.shape))
         print("the shape of the vectors matrix is: " + str(self.eignVectors.shape))
 
-        dimensions = self.calculateDimensionCount(0.85)
+        dimensions = self.calculateDimensionCount(self.alpha)
         print("the number of dimensions is: " + str(dimensions))
 
         # Extract only the top most eigenvectors

@@ -15,8 +15,8 @@ class LDA:
         self.projectedTrainingData = None
         self.trainingLabels = None
         self.lda = None
-        self.featureCount = 39
-        self.useSklearn = True
+        self.featureCount = 40
+        self.useSklearn = False
     
     def train(self, trainingData, trainingLabels):
         """
@@ -47,6 +47,7 @@ class LDA:
         betweenClassScatterMatrix = np.ones((10304, 10304))
         withinClassScatterMatrix = np.ones((10304, 10304))
 
+        print("Calculating within class scatter matrix and between class scatter matrix.")
         for i in range(0, self.classCount):
             classMean = np.mean(classes[i], axis=0)
 
